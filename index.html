@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Math Battle RPG</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Noto+Sans+Thai:wght@400;600;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root{
+    --bg-deep:#0e1a14;
+    --bg-panel:#16261c;
+    --ink-parchment:#f3e9d2;
+    --gold:#e0b23c;
+    --torch:#e2723a;
+    --hp-green:#4caf6b;
+    --hp-red:#e2543a;
+    --border-line:#3a5240;
+    --shadow-hard: 0 6px 0 #06100a;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;height:100%;}
+  body{
+    background:
+      radial-gradient(circle at 20% 10%, #1c3324 0%, transparent 45%),
+      radial-gradient(circle at 85% 90%, #21301f 0%, transparent 40%),
+      var(--bg-deep);
+    color:var(--ink-parchment);
+    font-family:'Noto Sans Thai', sans-serif;
+    min-height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+  }
+  .pixel{ font-family:'Press Start 2P', monospace; letter-spacing:0.5px; }
+  #app{ width:100%; max-width:640px; }
+  .card{
+    background:var(--bg-panel);
+    border:3px solid var(--border-line);
+    border-radius:10px;
+    box-shadow: var(--shadow-hard);
+    padding:22px;
+  }
+  h1.title{
+    font-size:15px;
+    text-align:center;
+    color:var(--gold);
+    margin:0 0 18px 0;
+    text-shadow: 2px 2px 0 #000;
+  }
+  h2.subtitle{
+    font-size:11px;
+    color:var(--torch);
+    margin:0 0 14px 0;
+    text-align:center;
+  }
+  label{ display:block; font-size:13px; margin-bottom:6px; color:#cfd9c9; }
+  input[type=text], input[type=password]{
+    width:100%;
+    padding:10px 12px;
+    background:#0e1a14;
+    border:2px solid var(--border-line);
+    border-radius:6px;
+    color:var(--ink-parchment);
+    font-family:'Noto Sans Thai',sans-serif;
+    font-size:15px;
+    margin-bottom:14px;
+  }
+  button{
+    font-family:'Noto Sans Thai',sans-serif;
+    font-weight:800;
+    font-size:15px;
+    padding:12px 16px;
+    border-radius:8px;
+    border:2px solid #06100a;
+    cursor:pointer;
+    transition:transform .06s ease;
+  }
+  button:active{ transform:translateY(2px); }
+  .btn-primary{
+    background:linear-gradient(180deg,#e0b23c,#b8871e);
+    color:#241708;
+    box-shadow:0 4px 0 #7a5c14;
+    width:100%;
+  }
+  .btn-primary:active{ box-shadow:0 2px 0 #7a5c14; }
+  .btn-ghost{
+    background:transparent;
+    color:var(--ink-parchment);
+    border-color:var(--border-line);
+    width:100%;
+    margin-top:8px;
+  }
+  .err{ color:var(--hp-red); font-size:13px; margin:-8px 0 12px 0; min-height:16px; }
+  .msg{ color:#9fd6ac; font-size:13px; margin:-8px 0 12px 0; min-height:16px; }
+
+  /* hero grid */
+  .hero-grid{
+    display:grid;
+    grid-template-columns:repeat(5, 1fr);
+    gap:8px;
+    margin-bottom:16px;
+  }
+  .hero-item{
+    background:#0e1a14;
+    border:2px solid var(--border-line);
+    border-radius:8px;
+    padding:6px;
+    text-align:center;
+    cursor:pointer;
+  }
+  .hero-item img{ width:100%; aspect-ratio:1/1; object-fit:contain; image-rendering:pixelated; }
+  .hero-item.selected{ border-color:var(--gold); box-shadow:0 0 0 2px var(--gold) inset; }
+
+  /* areas */
+  .area-list{ display:flex; flex-direction:column; gap:10px; }
+  .area-card{
+    background:#0e1a14;
+    border:2px solid var(--border-line);
+    border-radius:8px;
+    padding:14px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    cursor:pointer;
+  }
+  .area-card:hover{ border-color:var(--gold); }
+  .area-name{ font-weight:800; color:var(--gold); font-size:15px; }
+  .area-range{ font-size:12px; color:#9fb39a; }
+  .area-locked{ opacity:.4; cursor:not-allowed; }
+
+  /* top bar */
+  .topbar{ display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; font-size:12px; color:#9fb39a;}
+  .topbar b{ color:var(--gold); }
+
+  /* battle */
+  .combatants{ display:flex; justify-content:space-between; gap:10px; margin-bottom:14px; }
+  .combatant{ flex:1; background:#0e1a14; border:2px solid var(--border-line); border-radius:8px; padding:10px; text-align:center; }
+  .combatant img{ width:84px; height:84px; object-fit:contain; image-rendering:pixelated; margin-bottom:6px; }
+  .cname{ font-size:12px; font-weight:800; margin-bottom:6px; }
+  .hpbar-wrap{ background:#06100a; border-radius:6px; height:14px; overflow:hidden; border:1px solid #000; }
+  .hpbar{ height:100%; background:linear-gradient(180deg,#66d98a,#2f9954); transition:width .3s ease; }
+  .hpbar.low{ background:linear-gradient(180deg,#ef8a6c,#c94a2c); }
+  .hptext{ font-size:11px; margin-top:4px; color:#cfd9c9; }
+  .vs{ align-self:center; font-size:11px; color:var(--torch); font-weight:800; }
+
+  .question-box{
+    text-align:center;
+    background:#0e1a14;
+    border:2px dashed var(--gold);
+    border-radius:8px;
+    padding:18px 12px;
+    margin-bottom:14px;
+  }
+  .question-text{ font-size:22px; font-weight:800; color:var(--ink-parchment); margin-bottom:12px; }
+  .answer-row{ display:flex; gap:8px; }
+  .answer-row input{ margin-bottom:0; text-align:center; font-size:18px; }
+  .combo-tag{ font-size:11px; color:var(--torch); text-align:center; margin-bottom:10px; }
+
+  .log{ font-size:12px; color:#9fb39a; text-align:center; min-height:18px; margin-bottom:8px; }
+
+  .center{ text-align:center; }
+  .small{ font-size:12px; color:#9fb39a; }
+  .flash-hit{ animation: hitflash .25s ease; }
+  @keyframes hitflash{ 0%{ filter:brightness(2.2); } 100%{ filter:brightness(1); } }
+  .shake{ animation: shakeAnim .3s ease; }
+  @keyframes shakeAnim{ 0%,100%{transform:translateX(0);} 25%{transform:translateX(-6px);} 75%{transform:translateX(6px);} }
+</style>
+</head>
+<body>
+<div id="app"></div>
+
+<script>
+/* ======================================================================
+   CONFIG — แก้ตรงนี้ให้ตรงกับโปรเจกต์จริง
+   ====================================================================== */
+const CONFIG = {
+  SUPABASE_URL: "https://YOUR-PROJECT.supabase.co",   // TODO: ใส่ URL จริง (โปรเจกต์เดียวกับ math-puzzle/wordpuzzle เพื่อ shared login)
+  SUPABASE_ANON_KEY: "YOUR-ANON-KEY",                  // TODO: ใส่ anon key จริง
+  HERO_COUNT: 15,
+  HERO_PATH: "image/hero/",       // image/hero/1.png ... 15.png
+  MONSTER_PATH: "image/monster/", // image/monster/1.png ... 91.png
+};
+
+/* ======================================================================
+   BALANCE — สูตรเลเวล/HP/ATK ทั้งหมดอยู่ตรงนี้ที่เดียว ปรับง่าย
+   ====================================================================== */
+const Balance = {
+  playerMaxHP:  (lv) => 100 + (lv - 1) * 15,
+  playerATK:    (lv) => 10 + (lv - 1) * 2,
+  expToNext:    (lv) => 40 + (lv - 1) * 20,
+
+  monsterHP:    (lm) => Math.round(35 + lm * 10),
+  monsterATK:   (lm) => Math.round(4 + lm * 1.5),
+  monsterEXP:   (lm) => Math.round(8 + lm * 4),
+  monsterGold:  (lm) => Math.round(3 + lm * 2),
+
+  isBossLevel: (lv) => lv % 5 === 0,
+  bossMult: { hp: 3, atk: 1.4, reward: 4 },
+
+  comboMult(combo){
+    if (combo >= 8) return 2.0;
+    if (combo >= 5) return 1.5;
+    if (combo >= 3) return 1.2;
+    return 1.0;
+  }
+};
+
+const AREAS = [
+  { id:"beach",  name:"หาดทราย (Beach)", monsterLevelRange:[1,3],  imgRange:[1,30],  unlockLevel:1 },
+  { id:"forest", name:"ป่าลึก (Forest)",  monsterLevelRange:[3,6],  imgRange:[31,60], unlockLevel:4 },
+  { id:"cave",   name:"ถ้ำมืด (Cave)",    monsterLevelRange:[6,10], imgRange:[61,91], unlockLevel:7 },
+];
+
+const MONSTER_NAMES = ["ปู","สไลม์","หอยยักษ์","ก็อบลิน","หมาป่า","ต้นไม้ปีศาจ","ค้างคาว","โครงกระดูก","หินยักษ์"];
+
+/* ======================================================================
+   MATH QUESTION GENERATOR — อิงสไตล์ math-puzzle (สมการเชิงเส้น ax+b=c)
+   ความยากขยับตาม level ผู้เล่น
+   ====================================================================== */
+function randInt(min, max){ return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+function generateQuestion(playerLevel){
+  if (playerLevel <= 3){
+    // บวก/ลบเลขน้อย ไม่มีตัวแปร
+    const a = randInt(1, 20), b = randInt(1, 20);
+    const op = Math.random() < 0.5 ? "+" : "-";
+    let A=a, B=b;
+    if (op === "-" && A < B) [A,B] = [B,A];
+    const answer = op === "+" ? A+B : A-B;
+    return { text:`${A} ${op} ${B} = ?`, answer };
+  }
+  if (playerLevel <= 6){
+    // บวกลบเลขสองหลัก / คูณสูตรคูณ
+    const useMul = Math.random() < 0.4;
+    if (useMul){
+      const a = randInt(2,12), b = randInt(2,12);
+      return { text:`${a} × ${b} = ?`, answer: a*b };
+    }
+    const a = randInt(10,99), b = randInt(10,99);
+    const op = Math.random() < 0.5 ? "+" : "-";
+    let A=a,B=b;
+    if (op === "-" && A < B) [A,B] = [B,A];
+    const answer = op === "+" ? A+B : A-B;
+    return { text:`${A} ${op} ${B} = ?`, answer };
+  }
+  // level 7+: สมการเชิงเส้น ax + b = c  แก้หา x
+  const a = randInt(2, playerLevel <= 10 ? 5 : 9);
+  const x = randInt(1, 12);
+  const b = randInt(-15, 15);
+  const c = a*x + b;
+  const bStr = b >= 0 ? `+ ${b}` : `- ${Math.abs(b)}`;
+  return { text:`${a}x ${bStr} = ${c}   →   x = ?`, answer:x };
+}
+
+/* ======================================================================
+   SUPABASE
+   ====================================================================== */
+let supa = null;
+try{
+  if (window.supabase && CONFIG.SUPABASE_URL.startsWith("https://") && !CONFIG.SUPABASE_URL.includes("YOUR-PROJECT")){
+    supa = window.supabase.createClient(CONFIG.SUPABASE_URL, CONFIG.SUPABASE_ANON_KEY);
+  }
+}catch(e){ console.warn("Supabase init failed", e); }
+
+/*
+  Schema ที่แนะนำ (SQL):
+
+  -- ใช้ตาราง players ร่วมกับ math-puzzle / wordpuzzle (shared login: name + pin)
+  create table if not exists players (
+    id uuid primary key default gen_random_uuid(),
+    name text unique not null,
+    pin text not null,
+    created_at timestamptz default now()
+  );
+
+  -- โปรไฟล์เฉพาะเกมนี้ (แยกจากเกมอื่น แต่ login ร่วมกัน)
+  create table if not exists rpg_profiles (
+    player_id uuid primary key references players(id) on delete cascade,
+    hero_id int not null,
+    level int not null default 1,
+    exp int not null default 0,
+    hp int not null default 100,
+    max_hp int not null default 100,
+    atk int not null default 10,
+    gold int not null default 0,
+    area_unlocked text[] not null default array['beach'],
+    updated_at timestamptz default now()
+  );
+*/
+
+async function dbFindPlayer(name){
+  if (!supa) return null;
+  const { data, error } = await supa.from("players").select("*").eq("name", name).maybeSingle();
+  if (error){ console.warn(error); return null; }
+  return data;
+}
+async function dbCreatePlayer(name, pin){
+  if (!supa) return { id: "local-"+name, name };
+  const { data, error } = await supa.from("players").insert({ name, pin }).select().single();
+  if (error){ console.warn(error); return null; }
+  return data;
+}
+async function dbLoadProfile(playerId){
+  if (!supa) return null;
+  const { data, error } = await supa.from("rpg_profiles").select("*").eq("player_id", playerId).maybeSingle();
+  if (error){ console.warn(error); return null; }
+  return data;
+}
+async function dbSaveProfile(profile){
+  if (!supa) return;
+  await supa.from("rpg_profiles").upsert(profile);
+}
+
+/* ======================================================================
+   STATE + LOCAL STORAGE FALLBACK (เผื่อยังไม่ต่อ Supabase จริง)
+   ====================================================================== */
+const LS_KEY = "mbrpg_save_v1";
+function localLoad(){ try{ return JSON.parse(localStorage.getItem(LS_KEY) || "null"); }catch(e){ return null; } }
+function localSave(state){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+
+let S = {
+  screen: "login",         // login | herosel | area | battle | victory | gameover
+  name: "",
+  playerId: null,
+  hero: null,               // 1..15
+  profile: null,            // {level, exp, hp, max_hp, atk, gold, area_unlocked}
+  battle: null,              // current battle state
+  err: "",
+};
+
+function newProfile(heroId){
+  const lv = 1;
+  return {
+    hero_id: heroId,
+    level: lv,
+    exp: 0,
+    hp: Balance.playerMaxHP(lv),
+    max_hp: Balance.playerMaxHP(lv),
+    atk: Balance.playerATK(lv),
+    gold: 0,
+    area_unlocked: ["beach"],
+  };
+}
+
+async function persist(){
+  if (S.playerId && S.profile){
+    localSave({ playerId:S.playerId, name:S.name, profile:S.profile });
+    if (supa && !String(S.playerId).startsWith("local-")){
+      await dbSaveProfile({ player_id:S.playerId, ...S.profile });
+    }
+  }
+}
+
+/* ======================================================================
+   BATTLE LOGIC
+   ====================================================================== */
+function pickMonsterForArea(area, playerLevel){
+  const [lmMin, lmMax] = area.monsterLevelRange;
+  const lm = randInt(lmMin, lmMax);
+  const [imgMin, imgMax] = area.imgRange;
+  const img = randInt(imgMin, imgMax);
+  const isBoss = Balance.isBossLevel(playerLevel);
+  const name = MONSTER_NAMES[randInt(0, MONSTER_NAMES.length-1)];
+  let hp = Balance.monsterHP(lm);
+  let atk = Balance.monsterATK(lm);
+  let expR = Balance.monsterEXP(lm);
+  let goldR = Balance.monsterGold(lm);
+  if (isBoss){
+    hp = Math.round(hp * Balance.bossMult.hp);
+    atk = Math.round(atk * Balance.bossMult.atk);
+    expR = Math.round(expR * Balance.bossMult.reward);
+    goldR = Math.round(goldR * Balance.bossMult.reward);
+  }
+  return {
+    name: isBoss ? `บอส ${name}` : name,
+    level: lm, img, isBoss,
+    hp, maxHp: hp, atk, expReward: expR, goldReward: goldR,
+  };
+}
+
+function startBattle(areaId){
+  const area = AREAS.find(a => a.id === areaId);
+  const monster = pickMonsterForArea(area, S.profile.level);
+  S.battle = {
+    areaId,
+    monster,
+    combo: 0,
+    question: generateQuestion(S.profile.level),
+    log: `${monster.name} ปรากฏตัว!`,
+    lastResult: null, // "hit" | "miss"
+  };
+  S.screen = "battle";
+  render();
+}
+
+function answerQuestion(inputVal){
+  const b = S.battle;
+  if (!b) return;
+  const correct = Number(inputVal) === b.question.answer;
+  if (correct){
+    b.combo += 1;
+    const mult = Balance.comboMult(b.combo);
+    const dmg = Math.round(S.profile.atk * mult);
+    b.monster.hp = Math.max(0, b.monster.hp - dmg);
+    b.log = `ตอบถูก! โจมตี ${b.monster.name} ${dmg} ดาเมจ (คอมโบ x${mult})`;
+    b.lastResult = "hit";
+    if (b.monster.hp <= 0){
+      onVictory();
+      return;
+    }
+  } else {
+    b.combo = 0;
+    const dmg = b.monster.atk;
+    S.profile.hp = Math.max(0, S.profile.hp - dmg);
+    b.log = `ตอบผิด (เฉลย: ${b.question.answer}) ${b.monster.name} โจมตีกลับ ${dmg} ดาเมจ`;
+    b.lastResult = "miss";
+    if (S.profile.hp <= 0){
+      onGameOver();
+      return;
+    }
+  }
+  b.question = generateQuestion(S.profile.level);
+  render();
+}
+
+function onVictory(){
+  const b = S.battle;
+  S.profile.gold += b.monster.goldReward;
+  S.profile.exp += b.monster.expReward;
+  let leveledUp = false;
+  while (S.profile.exp >= Balance.expToNext(S.profile.level)){
+    S.profile.exp -= Balance.expToNext(S.profile.level);
+    S.profile.level += 1;
+    S.profile.max_hp = Balance.playerMaxHP(S.profile.level);
+    S.profile.atk = Balance.playerATK(S.profile.level);
+    S.profile.hp = S.profile.max_hp; // เต็ม HP ตอนเลเวลอัพ
+    leveledUp = true;
+    // ปลดล็อกพื้นที่ใหม่ตามเลเวล
+    AREAS.forEach(a=>{
+      if (S.profile.level >= a.unlockLevel && !S.profile.area_unlocked.includes(a.id)){
+        S.profile.area_unlocked.push(a.id);
+      }
+    });
+  }
+  S.battle.result = { won:true, expReward:b.monster.expReward, goldReward:b.monster.goldReward, leveledUp };
+  S.screen = "victory";
+  persist();
+  render();
+}
+
+function onGameOver(){
+  S.screen = "gameover";
+  render();
+}
+
+/* ======================================================================
+   AUTH
+   ====================================================================== */
+async function handleLogin(name, pin){
+  S.err = "";
+  if (!name || !pin){ S.err = "กรอกชื่อและ PIN ให้ครบ"; render(); return; }
+
+  if (supa){
+    let p = await dbFindPlayer(name);
+    if (!p){
+      p = await dbCreatePlayer(name, pin);
+      if (!p){ S.err = "สมัครไม่สำเร็จ ลองใหม่"; render(); return; }
+    } else if (String(p.pin) !== String(pin)){
+      S.err = "PIN ไม่ถูกต้อง";
+      render(); return;
+    }
+    S.playerId = p.id;
+    S.name = name;
+    const profile = await dbLoadProfile(p.id);
+    if (profile){
+      S.profile = profile;
+      S.hero = profile.hero_id;
+      S.screen = "area";
+    } else {
+      S.screen = "herosel";
+    }
+  } else {
+    // local fallback (ยังไม่ได้ต่อ Supabase จริง)
+    const saved = localLoad();
+    S.playerId = "local-" + name;
+    S.name = name;
+    if (saved && saved.name === name){
+      S.profile = saved.profile;
+      S.hero = saved.profile.hero_id;
+      S.screen = "area";
+    } else {
+      S.screen = "herosel";
+    }
+  }
+  render();
+}
+
+function chooseHero(heroId){
+  S.hero = heroId;
+  S.profile = newProfile(heroId);
+  S.screen = "area";
+  persist();
+  render();
+}
+
+function logout(){
+  S = { screen:"login", name:"", playerId:null, hero:null, profile:null, battle:null, err:"" };
+  render();
+}
+
+/* ======================================================================
+   RENDER
+   ====================================================================== */
+const app = document.getElementById("app");
+
+function heroImg(id){ return `${CONFIG.HERO_PATH}${id}.png`; }
+function monsterImg(id){ return `${CONFIG.MONSTER_PATH}${id}.png`; }
+
+function topbarHTML(){
+  if (!S.profile) return "";
+  return `<div class="topbar">
+    <span>${S.name} · Lv.${S.profile.level}</span>
+    <span><b>${S.profile.gold}</b> G</span>
+  </div>`;
+}
+
+function render(){
+  let html = "";
+
+  if (S.screen === "login"){
+    html = `
+      <div class="card">
+        <h1 class="title pixel">MATH BATTLE RPG</h1>
+        <h2 class="subtitle pixel">ตอบเลข ต่อสู้ ผจญภัย</h2>
+        <label>ชื่อผู้เล่น</label>
+        <input id="in-name" type="text" placeholder="ชื่อของเธอ" maxlength="20"/>
+        <label>PIN (4 หลัก)</label>
+        <input id="in-pin" type="password" inputmode="numeric" maxlength="6" placeholder="••••"/>
+        <div class="err">${S.err}</div>
+        <button class="btn-primary" id="btn-login">เข้าเกม / สมัคร</button>
+        <p class="small center" style="margin-top:12px;">ใช้ชื่อ+PIN เดียวกับ Math Puzzle / Word Puzzle ได้เลย</p>
+      </div>`;
+  }
+
+  else if (S.screen === "herosel"){
+    let grid = "";
+    for (let i=1; i<=CONFIG.HERO_COUNT; i++){
+      grid += `<div class="hero-item" data-hero="${i}">
+        <img src="${heroImg(i)}" alt="hero ${i}" onerror="this.style.opacity=0.15"/>
+      </div>`;
+    }
+    html = `
+      <div class="card">
+        <h1 class="title pixel">เลือกฮีโร่ของเธอ</h1>
+        <div class="hero-grid" id="hero-grid">${grid}</div>
+        <button class="btn-primary" id="btn-confirm-hero" disabled>ยืนยัน</button>
+      </div>`;
+  }
+
+  else if (S.screen === "area"){
+    let list = "";
+    AREAS.forEach(a=>{
+      const unlocked = S.profile.area_unlocked.includes(a.id);
+      list += `<div class="area-card ${unlocked?"":"area-locked"}" data-area="${a.id}" ${unlocked?"":"data-locked=1"}>
+        <div>
+          <div class="area-name">${a.name}</div>
+          <div class="area-range">มอนสเตอร์ Lv.${a.monsterLevelRange[0]}-${a.monsterLevelRange[1]}${unlocked?"":` · ปลดล็อกที่ Lv.${a.unlockLevel}`}</div>
+        </div>
+        <div class="pixel" style="font-size:10px;color:var(--gold)">${unlocked?"เข้า →":"🔒"}</div>
+      </div>`;
+    });
+    html = `
+      <div class="card">
+        ${topbarHTML()}
+        <h1 class="title pixel">เลือกพื้นที่</h1>
+        <div class="center small" style="margin-bottom:10px;">
+          HP ${S.profile.hp}/${S.profile.max_hp} · ATK ${S.profile.atk} · EXP ${S.profile.exp}/${Balance.expToNext(S.profile.level)}
+        </div>
+        <div class="area-list">${list}</div>
+        <button class="btn-ghost" id="btn-logout">ออกจากระบบ</button>
+      </div>`;
+  }
+
+  else if (S.screen === "battle"){
+    const b = S.battle;
+    const p = S.profile;
+    const pHpPct = Math.max(0, Math.round(100*p.hp/p.max_hp));
+    const mHpPct = Math.max(0, Math.round(100*b.monster.hp/b.monster.maxHp));
+    html = `
+      <div class="card">
+        ${topbarHTML()}
+        <div class="combatants">
+          <div class="combatant ${b.lastResult==='miss'?'shake':''}">
+            <img src="${heroImg(S.hero)}" onerror="this.style.opacity=0.15"/>
+            <div class="cname">${S.name} Lv.${p.level}</div>
+            <div class="hpbar-wrap"><div class="hpbar ${pHpPct<30?'low':''}" style="width:${pHpPct}%"></div></div>
+            <div class="hptext">${p.hp}/${p.max_hp}</div>
+          </div>
+          <div class="vs pixel">VS</div>
+          <div class="combatant ${b.lastResult==='hit'?'flash-hit':''}">
+            <img src="${monsterImg(b.monster.img)}" onerror="this.style.opacity=0.15"/>
+            <div class="cname">${b.monster.name} Lv.${b.monster.level}</div>
+            <div class="hpbar-wrap"><div class="hpbar ${mHpPct<30?'low':''}" style="width:${mHpPct}%"></div></div>
+            <div class="hptext">${b.monster.hp}/${b.monster.maxHp}</div>
+          </div>
+        </div>
+        <div class="combo-tag">${b.combo>0 ? `COMBO x${b.combo}  (dmg ×${Balance.comboMult(b.combo)})` : ""}</div>
+        <div class="question-box">
+          <div class="question-text">${b.question.text}</div>
+          <div class="answer-row">
+            <input id="in-answer" type="text" inputmode="numeric" placeholder="คำตอบ" autofocus/>
+            <button class="btn-primary" id="btn-answer" style="width:auto;">ตอบ</button>
+          </div>
+        </div>
+        <div class="log">${b.log}</div>
+      </div>`;
+  }
+
+  else if (S.screen === "victory"){
+    const r = S.battle.result;
+    html = `
+      <div class="card center">
+        <h1 class="title pixel" style="color:var(--hp-green)">VICTORY!</h1>
+        <p>ได้รับ <b>${r.expReward} EXP</b> และ <b>${r.goldReward} Gold</b></p>
+        ${r.leveledUp ? `<p class="pixel" style="font-size:11px;color:var(--gold);">LEVEL UP! ตอนนี้ Lv.${S.profile.level}</p>` : ""}
+        <button class="btn-primary" id="btn-continue">ไปต่อ</button>
+      </div>`;
+  }
+
+  else if (S.screen === "gameover"){
+    html = `
+      <div class="card center">
+        <h1 class="title pixel" style="color:var(--hp-red)">GAME OVER</h1>
+        <p class="small">อย่าท้อ ตอบเลขให้แม่นแล้วลองใหม่นะ</p>
+        <button class="btn-primary" id="btn-retry">กลับไปพักฟื้น</button>
+      </div>`;
+  }
+
+  app.innerHTML = html;
+  bindEvents();
+}
+
+function bindEvents(){
+  if (S.screen === "login"){
+    document.getElementById("btn-login").onclick = () => {
+      const name = document.getElementById("in-name").value.trim();
+      const pin = document.getElementById("in-pin").value.trim();
+      handleLogin(name, pin);
+    };
+  }
+  else if (S.screen === "herosel"){
+    let picked = null;
+    document.querySelectorAll(".hero-item").forEach(el=>{
+      el.onclick = () => {
+        document.querySelectorAll(".hero-item").forEach(x=>x.classList.remove("selected"));
+        el.classList.add("selected");
+        picked = Number(el.dataset.hero);
+        document.getElementById("btn-confirm-hero").disabled = false;
+      };
+    });
+    document.getElementById("btn-confirm-hero").onclick = () => {
+      if (picked) chooseHero(picked);
+    };
+  }
+  else if (S.screen === "area"){
+    document.querySelectorAll(".area-card").forEach(el=>{
+      el.onclick = () => {
+        if (el.dataset.locked) return;
+        startBattle(el.dataset.area);
+      };
+    });
+    document.getElementById("btn-logout").onclick = logout;
+  }
+  else if (S.screen === "battle"){
+    const submit = () => {
+      const val = document.getElementById("in-answer").value.trim();
+      if (val === "") return;
+      answerQuestion(val);
+    };
+    document.getElementById("btn-answer").onclick = submit;
+    const input = document.getElementById("in-answer");
+    input.onkeydown = (e) => { if (e.key === "Enter") submit(); };
+    input.focus();
+  }
+  else if (S.screen === "victory"){
+    document.getElementById("btn-continue").onclick = () => {
+      S.screen = "area";
+      render();
+    };
+  }
+  else if (S.screen === "gameover"){
+    document.getElementById("btn-retry").onclick = () => {
+      S.profile.hp = S.profile.max_hp; // พักฟื้นเต็ม HP แล้วกลับไปเลือกพื้นที่ใหม่ (R0: ไม่มีบทลงโทษ)
+      S.screen = "area";
+      persist();
+      render();
+    };
+  }
+}
+
+render();
+</script>
+</body>
+</html>
