@@ -204,6 +204,12 @@ async function afterAuth() {
   let saved = local;
   if (cloud && (!local || totalXpOf(cloud) > totalXpOf(local))) saved = cloud;
 
+  // เติม heroName ถ้าขาด (player เก่าอาจไม่มีฟิลด์นี้)
+  if (saved && saved.heroId != null) {
+    const h = HEROES.find(x => x.id === saved.heroId);
+    saved.heroName = h ? h.name : (saved.heroName || 'ไม่ระบุ');
+  }
+
   if (saved && saved.heroId) {
     player = saved;
     applyLevelStats(player);                // เผื่อปรับสูตรบาลานซ์ภายหลัง
