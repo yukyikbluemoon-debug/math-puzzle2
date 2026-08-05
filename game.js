@@ -71,6 +71,7 @@ function saveKey(){ return 'mathrpg_save_' + (account?.name || 'guest'); }
 function saveLocal() {
   if (!player) return;
   try { localStorage.setItem(saveKey(), JSON.stringify(player)); } catch(e){}
+  syncCloud();
 }
 function loadLocal() {
   try { const r = localStorage.getItem(saveKey()); return r ? JSON.parse(r) : null; } catch(e){ return null; }
