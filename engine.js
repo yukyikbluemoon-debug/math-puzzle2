@@ -101,7 +101,7 @@ function generateQuestion(playerLevel) {
 function createPlayer(name, heroId) {
   const hero = HEROES.find(h => h.id === heroId) || HEROES[0];
   return {
-    name, heroId: hero.id, heroImg: hero.img,
+    name, heroId: hero.id, heroImg: hero.img, heroName: hero.name,
     level: 1, exp: 0,
     expToNext: BALANCE.expToNext(1),
     maxHp: BALANCE.playerMaxHP(1),

@@ -260,7 +260,7 @@ function goHome() {
 
 function renderHome() {
   $('home-hero').src   = player.heroImg;
-  $('home-name').textContent = player.name;
+  $('home-name').textContent = player.name + ' (' + (player.heroName || 'ไม่ระบุ') + ')';
   $('home-lv').textContent   = player.level;
   $('home-gold').textContent = player.gold;
   $('home-hp').textContent   = `${player.hp}/${player.maxHp}`;
