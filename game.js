@@ -91,20 +91,21 @@ async function syncCloud() {
       p_area: player.unlockedArea, p_hp: player.hp
     });
     if (error) throw error;
-    // เขียนลง math_scores (ตารางอันดับดึงจากนี้) — upsert ตาม name
-    const { error: lbErr } = await db.from('math_scores')
-      .upsert(
-        {
-          name: account.name,
-          pin: account.pin,
-          xp: totalXpOf(player),
-          level: player.level,
-          games_played: 1,
-          total_correct: player.totalCorrect
-        },
-        { onConflict: 'name' }
-      );
-    if (lbErr) console.warn('math_scores upsert:', lbErr.message);
+    // เขียนลง math_scores (ตารางอันดับดึงจากนี้)
+    // ใช้ delete+insert แทน upsert เพื่อไม่ต้องพึ่ง unique index
+    const xpVal = totalXpOf(player);
+    const { error: delErr } = await db.from('math_scores').delete().eq('name', account.name);
+    if (delErr) console.warn('math_scores delete:', delErr.message);
+    const { error: insErr } = await db.from('math_scores').insert({
+      name: account.name,
+      pin: account.pin,
+      xp: xpVal,
+      level: player.level,
+      games_played: 1,
+      total_correct: player.totalCorrect,
+      account_id: account.id
+    });
+    if (insErr) console.warn('math_scores insert:', insErr.message);
     cloudState = 'ok';
   } catch (e) {
     // 404 = ยังไม่ได้รัน supabase_setup.sql -> เกมยังเล่นได้ด้วย localStorage
