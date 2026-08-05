@@ -91,6 +91,13 @@ async function syncCloud() {
       p_area: player.unlockedArea, p_hp: player.hp
     });
     if (error) throw error;
+    // อัพเดตตารางอันดับ (leaderboard) — upsert ตาม name
+    const { error: lbErr } = await db.from('math_leaderboard')
+      .upsert(
+        { name: account.name, level: player.level, xp: totalXpOf(player) },
+        { onConflict: 'name' }
+      );
+    if (lbErr) console.warn('leaderboard upsert:', lbErr.message);
     cloudState = 'ok';
   } catch (e) {
     // 404 = ยังไม่ได้รัน supabase_setup.sql -> เกมยังเล่นได้ด้วย localStorage
