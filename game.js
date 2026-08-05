@@ -278,16 +278,20 @@ function renderHome() {
 
   const list = $('area-list'); list.innerHTML = '';
   AREAS.forEach(a => {
+    // ล็อกถ้ายังไม่ถึงเลเวลขั้นต่ำ
     const locked = player.level < a.unlockLv;
-    const boss = isBossLevel(player.level) && !locked && a.id === player.unlockedArea;
+    // บังคับห้ามถอยไปพื้นที่ต่ำกว่าเลเวลปัจจุบันเกิน 3 เลเวล (กันฟาร์มโซนอ่อน)
+    const tooEasy = !locked && a.minLv < player.level - 3;
+    const lockedFinal = locked || tooEasy;
+    const boss = isBossLevel(player.level) && !lockedFinal && a.id === player.unlockedArea;
     const d = document.createElement('div');
-    d.className = 'area-btn' + (locked ? ' lock' : '');
+    d.className = 'area-btn' + (lockedFinal ? ' lock' : '');
     d.innerHTML = `<span class="ic">${a.icon}</span>
       <div style="flex:1">
         <div class="nm">${a.name} <span style="color:var(--dim);font-weight:400">${a.en}</span></div>
-        <div class="lv">${locked ? '🔒 ปลดล็อกที่ Lv.'+a.unlockLv : 'มอนสเตอร์ Lv.'+a.minLv+'-'+a.maxLv+(boss?' · ⚠️ มีบอสรออยู่':'')}</div>
+        <div class="lv">${locked ? '🔒 ปลดล็อกที่ Lv.'+a.unlockLv : tooEasy ? '🔒 เลเวลสูงเกินไป (ง่ายไป)' : 'มอนสเตอร์ Lv.'+a.minLv+'-'+a.maxLv+(boss?' · ⚠️ มีบอสรออยู่':'')}</div>
       </div>`;
-    if (!locked) d.onclick = () => { sClick(); startBattle(a.id, boss); };
+    if (!lockedFinal) d.onclick = () => { sClick(); startBattle(a.id, boss); };
     list.appendChild(d);
   });
 }
