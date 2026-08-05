@@ -1,6 +1,6 @@
 :root{
   --bg:#0d1117; --bg2:#161b22; --panel:#1c2230; --line:#2b3444;
-  --txt:#e6edf3; --dim:#8b98a9; --acc:#4c8dff; --hp:#3fb950; --hp2:#238636;
+  --txt:#e6edf3; --dim:#a9b6c7; --acc:#4c8dff; --hp:#3fb950; --hp2:#238636;
   --mhp:#f85149; --exp:#d29922; --gold:#e3b341; --combo:#ff7b3d;
   --radius:14px; --shadow:0 6px 24px rgba(0,0,0,.45);
 }
@@ -43,9 +43,9 @@ button.warn{background:#30363d}
 .hero-name{text-align:center;font-size:14px;color:var(--acc);min-height:20px;font-weight:600}
 
 /* ---- home ---- */
-.stat-line{display:flex;justify-content:space-between;font-size:13px;color:var(--dim);margin:6px 0}
-.stat-line b{color:var(--txt)}
-.bar{height:12px;background:#0f141c;border-radius:99px;overflow:hidden;border:1px solid var(--line)}
+.stat-line{display:flex;justify-content:space-between;font-size:15px;color:var(--dim);margin:8px 0}
+.stat-line b{color:var(--txt);font-weight:800;font-size:17px}
+.bar{height:16px;background:#0f141c;border-radius:99px;overflow:hidden;border:1px solid var(--line)}
 .bar>i{display:block;height:100%;border-radius:99px;transition:width .45s cubic-bezier(.2,.8,.2,1)}
 .bar.hp>i{background:linear-gradient(90deg,var(--hp2),var(--hp))}
 .bar.mhp>i{background:linear-gradient(90deg,#8b1f1f,var(--mhp))}
@@ -55,14 +55,15 @@ button.warn{background:#30363d}
 .area-btn:hover{border-color:var(--acc)}
 .area-btn.lock{opacity:.4;cursor:not-allowed}
 .area-btn .ic{font-size:26px}
-.area-btn .nm{font-weight:600;font-size:15px}
-.area-btn .lv{font-size:12px;color:var(--dim)}
+.area-btn .nm{font-weight:700;font-size:17px}
+.area-btn .lv{font-size:14px;color:var(--dim)}
 
 /* ---- battle ---- */
 .combat{display:flex;justify-content:space-between;gap:10px}
 .unit{flex:1;text-align:center}
-.unit .nm{font-size:13px;font-weight:600;margin-bottom:4px}
-.unit .hpnum{font-size:11px;color:var(--dim);margin-top:3px}
+.unit .nm{font-size:15px;font-weight:700;margin-bottom:6px;color:var(--txt)}
+.unit .hpnum{font-size:16px;font-weight:800;color:var(--txt);margin-top:5px;
+  text-shadow:0 1px 3px rgba(0,0,0,.6);letter-spacing:.3px}
 .sprite-box{height:120px;display:flex;align-items:flex-end;justify-content:center;position:relative;margin-top:8px}
 .sprite{max-height:118px;max-width:100%;object-fit:contain;image-rendering:pixelated;
   filter:drop-shadow(0 6px 8px rgba(0,0,0,.5))}
@@ -77,8 +78,8 @@ button.warn{background:#30363d}
 .anim-atk-r{animation:atkR .42s ease}
 .anim-atk-l{animation:atkL .42s ease}
 .anim-hurt{animation:hurt .42s ease}
-.float{position:absolute;top:6px;left:50%;transform:translateX(-50%);font-weight:800;
-  font-size:22px;pointer-events:none;animation:fl .9s ease forwards;text-shadow:0 2px 6px #000}
+.float{position:absolute;top:6px;left:50%;transform:translateX(-50%);font-weight:900;
+  font-size:30px;pointer-events:none;animation:fl .9s ease forwards;text-shadow:0 2px 6px #000}
 @keyframes fl{0%{opacity:0;transform:translate(-50%,10px) scale(.7)}
   25%{opacity:1;transform:translate(-50%,-6px) scale(1.15)}
   100%{opacity:0;transform:translate(-50%,-46px) scale(1)}}
@@ -87,14 +88,16 @@ button.warn{background:#30363d}
 .qbox{text-align:center;margin:18px 0 8px}
 .q{font-size:34px;font-weight:800;letter-spacing:1px}
 .q .qm{color:var(--acc)}
-.hintline{font-size:12px;color:var(--dim);min-height:16px;margin-top:6px}
+.hintline{font-size:15px;color:var(--dim);min-height:16px;margin-top:6px}
 #ans{text-align:center;font-size:26px;font-weight:700;letter-spacing:2px;padding:12px}
-.combo{text-align:center;font-weight:800;color:var(--combo);min-height:22px;font-size:15px;margin-top:8px}
-.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px}
-.keypad button{margin:0;padding:14px 0;font-size:19px;background:#222a37;border:1px solid var(--line)}
-.keypad button.ok{background:var(--hp2);grid-column:span 2}
+.combo{text-align:center;font-weight:800;color:var(--combo);min-height:26px;font-size:18px;
+  margin-top:10px;text-shadow:0 0 12px rgba(255,123,61,.45)}
+.keypad{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:14px}
+.keypad button{margin:0;padding:20px 0;font-size:28px;font-weight:700;
+  background:#2a3444;border:1px solid #3a4658;min-height:64px}
+.keypad button.ok{background:var(--hp2);grid-column:span 2;font-size:22px;letter-spacing:1px}
 .keypad button.del{background:#3d2a2a}
-.log{margin-top:10px;font-size:12px;color:var(--dim);text-align:center;min-height:18px}
+.log{margin-top:12px;font-size:15px;font-weight:600;color:var(--dim);text-align:center;min-height:18px}
 .boss-tag{display:inline-block;background:var(--mhp);color:#fff;font-size:10px;padding:1px 6px;
   border-radius:6px;margin-left:4px;vertical-align:middle}
 
@@ -102,11 +105,25 @@ button.warn{background:#30363d}
 .big{font-size:30px;text-align:center;font-weight:800;margin-bottom:6px}
 .win{color:var(--hp)}.lose{color:var(--mhp)}
 .reward{background:#0f141c;border:1px solid var(--line);border-radius:12px;padding:12px;margin:12px 0}
-.reward div{display:flex;justify-content:space-between;font-size:14px;padding:4px 0}
+.reward{padding:14px}
+.reward div{display:flex;justify-content:space-between;align-items:center;
+  font-size:16px;padding:8px 0;border-bottom:1px solid #1e2733}
+.reward div:last-child{border-bottom:none}
+.reward div span{color:var(--dim)}
+.reward div b{font-size:19px;font-weight:800}
 .lvup{text-align:center;color:var(--exp);font-weight:800;font-size:17px;margin:8px 0;
   animation:pulse 1s ease infinite}
 @keyframes pulse{50%{transform:scale(1.06)}}
-.lb-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;
-  background:#0f141c;border:1px solid var(--line);border-radius:10px;margin-top:6px;font-size:13px}
+.lb-row{display:flex;justify-content:space-between;align-items:center;padding:11px 12px;
+  background:#0f141c;border:1px solid var(--line);border-radius:10px;margin-top:7px;font-size:15px}
 .lb-row.me{border-color:var(--acc)}
-.muted{color:var(--dim);font-size:12px;text-align:center;margin-top:10px}
+.muted{color:var(--dim);font-size:14px;text-align:center;margin-top:10px}
+/* สรุปถูก/ผิด ท้ายหน้าผลลัพธ์ — ตัวใหญ่ อ่านชัด */
+.tally{display:flex;gap:10px;margin-top:12px}
+.tally .t{flex:1;background:#0f141c;border:1px solid var(--line);border-radius:12px;
+  padding:12px 8px;text-align:center}
+.tally .t .n{font-size:32px;font-weight:900;line-height:1.1}
+.tally .t .l{font-size:14px;font-weight:700;color:var(--dim);margin-top:3px}
+.tally .ok .n{color:var(--hp)}
+.tally .no .n{color:var(--mhp)}
+.tally .acc .n{color:var(--acc)}

@@ -321,6 +321,16 @@ $('btn-flee').onclick = () => {
 // ============================================
 // RESULT
 // ============================================
+// สรุปถูก/ผิด/ความแม่นยำ แบบตัวใหญ่อ่านชัด
+function renderTally() {
+  const c = player.totalCorrect, w = player.totalWrong, t = c + w;
+  const acc = t ? Math.round(c / t * 100) : 0;
+  $('r-tally').innerHTML =
+    `<div class="t ok"><div class="n">${c}</div><div class="l">ตอบถูก</div></div>` +
+    `<div class="t no"><div class="n">${w}</div><div class="l">ตอบผิด</div></div>` +
+    `<div class="t acc"><div class="n">${acc}%</div><div class="l">ความแม่นยำ</div></div>`;
+}
+
 function endBattle(win, r) {
   const m = battle.monster;
   if (win) { sWin(); vib([100,60,140]); } else { sLose(); vib([300]); }
@@ -342,7 +352,8 @@ function endBattle(win, r) {
       <div><span>คอมโบสูงสุด</span><b style="color:var(--combo)">x${player.bestCombo}</b></div>
       <div><span>สถานะตอนนี้</span><b>Lv.${player.level} · HP ${player.hp}/${player.maxHp} · ATK ${player.atk}</b></div>
       <div><span>EXP</span><b>${player.exp}/${player.expToNext}</b></div>`;
-    $('r-note').textContent = `ตอบถูกรวม ${player.totalCorrect} · ผิด ${player.totalWrong} ข้อ`;
+    renderTally();
+    $('r-note').textContent = '';
     $('btn-again').textContent = 'สู้ต่อ';
   } else {
     player.hp = Math.max(1, Math.round(player.maxHp * 0.3));
@@ -351,6 +362,7 @@ function endBattle(win, r) {
       <div><span>เลเวลปัจจุบัน</span><b>Lv.${player.level}</b></div>
       <div><span>ตอบถูก / ผิด</span><b>${player.totalCorrect} / ${player.totalWrong}</b></div>
       <div><span>ฟื้นคืนชีพ</span><b style="color:var(--hp)">HP ${player.hp}/${player.maxHp}</b></div>`;
+    renderTally();
     $('r-note').textContent = 'เลเวลและของไม่หาย — ลองอีกครั้งได้เลย';
     $('btn-again').textContent = 'ลองใหม่';
   }
