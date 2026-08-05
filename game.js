@@ -278,10 +278,10 @@ function renderHome() {
 
   const list = $('area-list'); list.innerHTML = '';
   AREAS.forEach(a => {
-    // ล็อกถ้ายังไม่ถึงเลเวลขั้นต่ำ
+    // ล็อกถ้ายังไม่ถึงเลเวลขั้นต่ำ (ยังไม่ปลดล็อก)
     const locked = player.level < a.unlockLv;
-    // บังคับห้ามถอยไปพื้นที่ต่ำกว่าเลเวลปัจจุบันเกิน 3 เลเวล (กันฟาร์มโซนอ่อน)
-    const tooEasy = !locked && a.minLv < player.level - 3;
+    // ล็อกถ้าเลเวลปัจจุบันเกินช่วงของพื้นที่ (ง่ายเกิน ห้ามถอยมาเล่น)
+    const tooEasy = !locked && player.level > a.maxLv;
     const lockedFinal = locked || tooEasy;
     const boss = isBossLevel(player.level) && !lockedFinal && a.id === player.unlockedArea;
     const d = document.createElement('div');
