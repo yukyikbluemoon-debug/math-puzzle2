@@ -38,40 +38,32 @@
   <!-- ============ HOME ============ -->
   <section id="screen-home" class="screen">
     <div class="card">
-      <!-- กล่อง Hero-Head: แบ่งเป็น 2 คอลัมน์ด้วย Grid -->
+      <!-- การ์ดตัวละคร: ซ้ายรูปใหญ่ | ขวาข้อมูล+แถบสถานะ -->
       <div class="hero-head">
-        <!-- คอลัมน์ซ้าย: รูป Avatar -->
         <div class="hero-avatar-col">
           <img id="home-hero" class="sprite" alt="">
         </div>
-        
-        <!-- คอลัมน์ขวา: ข้อมูล, เลเวล, แถบ HP/EXP -->
         <div class="hero-meta">
-          <div class="hero-row" style="display:flex; justify-content:space-between; align-items:center;">
+          <div class="hero-row">
             <div class="hero-title" id="home-name">-</div>
             <button class="snd-btn" id="btn-sound" title="ปิดเสียง">🔊</button>
           </div>
-          
-          <div class="stat-line" style="margin: 6px 0 10px;">
-            <span>Level <b id="home-lv">1</b></span>
-            <span>💰 <b id="home-gold">0</b></span>
-          </div>
+          <div class="mini-stat"><span>Level <b id="home-lv">1</b></span><span>💰 <b id="home-gold">0</b></span></div>
 
-          <div style="font-size:13px; color:var(--dim); margin-bottom:4px;">❤️ HP <b id="home-hp" style="color:var(--txt); font-weight:800;">80/80</b></div>
+          <div class="mini-stat"><span>❤️ HP</span><b id="home-hp">80/80</b></div>
           <div class="bar hp"><i id="home-hpbar" style="width:100%"></i></div>
 
-          <div style="font-size:13px; color:var(--dim); margin: 8px 0 4px;">⭐ EXP <span id="home-exptxt" style="color:var(--txt); font-weight:800;">0/60 EXP</span></div>
+          <div class="mini-stat"><span>⭐ EXP</span><b id="home-exptxt">0/60 EXP</b></div>
           <div class="bar exp"><i id="home-expbar" style="width:0%"></i></div>
         </div>
       </div>
 
-      <!-- ATK, Kill และปุ่มพักฟื้น อยู่นอกกล่อง Hero-Head เพื่อให้กว้างเต็มหน้า -->
+      <!-- ATK / ล้ม อยู่ใต้การ์ด กว้างเต็มแถว -->
       <div class="stat-line" style="margin-top:14px">
         <span>⚔️ ATK <b id="home-atk">10</b></span>
         <span>🏆 ล้ม <b id="home-kill">0</b></span>
       </div>
       <button id="btn-rest" class="warn" style="margin-top:10px">🏕️ พักฟื้น (ใช้ 10 ทอง เต็ม HP)</button>
-      
       <div id="cloud-badge" class="cloud"></div>
 
       <p class="sub" style="margin:16px 0 4px">เลือกพื้นที่ล่ามอนสเตอร์</p>
