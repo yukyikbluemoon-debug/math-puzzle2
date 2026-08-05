@@ -38,42 +38,40 @@
   <!-- ============ HOME ============ -->
   <section id="screen-home" class="screen">
     <div class="card">
+      <!-- กล่อง Hero-Head: แบ่งเป็น 2 คอลัมน์ด้วย Grid -->
       <div class="hero-head">
-        <img id="home-hero" class="sprite" alt="">
-        <div class="hero-head">
-  <div class="hero-avatar">
-    <img id="home-hero" class="sprite" alt="">
-  </div>
-  <div class="hero-meta">
-    <div class="hero-row">
-      <div class="hero-title" id="home-name">-</div>
-      <button class="snd-btn" id="btn-sound" title="ปิดเสียง">🔊</button>
-    </div>
-    <div class="stat-line"><span>Level <b id="home-lv">1</b></span><span>💰 <b id="home-gold">0</b></span></div>
-    
-    <!-- แถบ HP ย้ายเข้ามาในคอลัมน์ -->
-    <div class="bar hp" style="margin-top:10px"><i id="home-hpbar" style="width:100%"></i></div>
-    
-    <!-- แถบ EXP ย้ายเข้ามาในคอลัมน์ -->
-    <div class="bar exp" style="margin-top:8px"><i id="home-expbar" style="width:0%"></i></div>
-    <div style="font-size:13px;color:var(--dim);margin-top:4px;text-align:center">
-      <span id="home-exptxt">0/60 EXP</span>
-    </div>
-  </div>
-</div>
+        <!-- คอลัมน์ซ้าย: รูป Avatar -->
+        <div class="hero-avatar-col">
+          <img id="home-hero" class="sprite" alt="">
+        </div>
+        
+        <!-- คอลัมน์ขวา: ข้อมูล, เลเวล, แถบ HP/EXP -->
+        <div class="hero-meta">
+          <div class="hero-row" style="display:flex; justify-content:space-between; align-items:center;">
+            <div class="hero-title" id="home-name">-</div>
+            <button class="snd-btn" id="btn-sound" title="ปิดเสียง">🔊</button>
+          </div>
+          
+          <div class="stat-line" style="margin: 6px 0 10px;">
+            <span>Level <b id="home-lv">1</b></span>
+            <span>💰 <b id="home-gold">0</b></span>
+          </div>
 
-<!-- ATK กับ Kill อยู่นอกคอลัมน์เหมือนเดิม -->
-<div class="stat-line" style="margin-top:14px">
-  <span>❤️ HP <b id="home-hp">80/80</b></span>
-  <span>⚔️ ATK <b id="home-atk">10</b></span>
-  <span>🏆 ล้ม <b id="home-kill">0</b></span>
-</div>
-      <div class="bar hp" style="margin-top:4px"><i id="home-hpbar" style="width:100%"></i></div>
-      <div class="stat-line" style="margin-top:12px">
-        <span>⭐ EXP</span><span id="home-exptxt">0/60 EXP</span>
+          <div style="font-size:13px; color:var(--dim); margin-bottom:4px;">❤️ HP <b id="home-hp" style="color:var(--txt); font-weight:800;">80/80</b></div>
+          <div class="bar hp"><i id="home-hpbar" style="width:100%"></i></div>
+
+          <div style="font-size:13px; color:var(--dim); margin: 8px 0 4px;">⭐ EXP <span id="home-exptxt" style="color:var(--txt); font-weight:800;">0/60 EXP</span></div>
+          <div class="bar exp"><i id="home-expbar" style="width:0%"></i></div>
+        </div>
       </div>
-      <div class="bar exp" style="margin-top:4px"><i id="home-expbar" style="width:0%"></i></div>
+
+      <!-- ATK, Kill และปุ่มพักฟื้น อยู่นอกกล่อง Hero-Head เพื่อให้กว้างเต็มหน้า -->
+      <div class="stat-line" style="margin-top:14px">
+        <span>⚔️ ATK <b id="home-atk">10</b></span>
+        <span>🏆 ล้ม <b id="home-kill">0</b></span>
+      </div>
       <button id="btn-rest" class="warn" style="margin-top:10px">🏕️ พักฟื้น (ใช้ 10 ทอง เต็ม HP)</button>
+      
       <div id="cloud-badge" class="cloud"></div>
 
       <p class="sub" style="margin:16px 0 4px">เลือกพื้นที่ล่ามอนสเตอร์</p>
