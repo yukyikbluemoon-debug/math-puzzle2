@@ -40,20 +40,34 @@
     <div class="card">
       <div class="hero-head">
         <img id="home-hero" class="sprite" alt="">
-        <div class="hero-meta">
-          <div class="hero-row">
-            <div class="hero-title" id="home-name">-</div>
-            <button class="snd-btn" id="btn-sound" title="ปิดเสียง">🔊</button>
-          </div>
-          <div class="stat-line"><span>Level <b id="home-lv">1</b></span><span>💰 <b id="home-gold">0</b></span></div>
-        </div>
-      </div>
-      <!-- HP กับ EXP อยู่นอกคอลัมน์รูป → กว้างเท่ากันพอดี -->
-      <div class="stat-line" style="margin-top:14px">
-        <span>❤️ HP <b id="home-hp">80/80</b></span>
-        <span>⚔️ ATK <b id="home-atk">10</b></span>
-        <span>🏆 ล้ม <b id="home-kill">0</b></span>
-      </div>
+        <div class="hero-head">
+  <div class="hero-avatar">
+    <img id="home-hero" class="sprite" alt="">
+  </div>
+  <div class="hero-meta">
+    <div class="hero-row">
+      <div class="hero-title" id="home-name">-</div>
+      <button class="snd-btn" id="btn-sound" title="ปิดเสียง">🔊</button>
+    </div>
+    <div class="stat-line"><span>Level <b id="home-lv">1</b></span><span>💰 <b id="home-gold">0</b></span></div>
+    
+    <!-- แถบ HP ย้ายเข้ามาในคอลัมน์ -->
+    <div class="bar hp" style="margin-top:10px"><i id="home-hpbar" style="width:100%"></i></div>
+    
+    <!-- แถบ EXP ย้ายเข้ามาในคอลัมน์ -->
+    <div class="bar exp" style="margin-top:8px"><i id="home-expbar" style="width:0%"></i></div>
+    <div style="font-size:13px;color:var(--dim);margin-top:4px;text-align:center">
+      <span id="home-exptxt">0/60 EXP</span>
+    </div>
+  </div>
+</div>
+
+<!-- ATK กับ Kill อยู่นอกคอลัมน์เหมือนเดิม -->
+<div class="stat-line" style="margin-top:14px">
+  <span>❤️ HP <b id="home-hp">80/80</b></span>
+  <span>⚔️ ATK <b id="home-atk">10</b></span>
+  <span>🏆 ล้ม <b id="home-kill">0</b></span>
+</div>
       <div class="bar hp" style="margin-top:4px"><i id="home-hpbar" style="width:100%"></i></div>
       <div class="stat-line" style="margin-top:12px">
         <span>⭐ EXP</span><span id="home-exptxt">0/60 EXP</span>
