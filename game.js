@@ -91,13 +91,20 @@ async function syncCloud() {
       p_area: player.unlockedArea, p_hp: player.hp
     });
     if (error) throw error;
-    // อัพเดตตารางอันดับ (leaderboard) — upsert ตาม name
-    const { error: lbErr } = await db.from('math_leaderboard')
+    // เขียนลง math_scores (ตารางอันดับดึงจากนี้) — upsert ตาม name
+    const { error: lbErr } = await db.from('math_scores')
       .upsert(
-        { name: account.name, level: player.level, xp: totalXpOf(player) },
+        {
+          name: account.name,
+          pin: account.pin,
+          xp: totalXpOf(player),
+          level: player.level,
+          games_played: 1,
+          total_correct: player.totalCorrect
+        },
         { onConflict: 'name' }
       );
-    if (lbErr) console.warn('leaderboard upsert:', lbErr.message);
+    if (lbErr) console.warn('math_scores upsert:', lbErr.message);
     cloudState = 'ok';
   } catch (e) {
     // 404 = ยังไม่ได้รัน supabase_setup.sql -> เกมยังเล่นได้ด้วย localStorage
