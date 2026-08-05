@@ -43,44 +43,33 @@ button.warn{background:#30363d}
 .hero-name{text-align:center;font-size:14px;color:var(--acc);min-height:20px;font-weight:600}
 
 /* ---- home ---- */
-/* ใช้ Grid ล็อค 2 คอลัมน์: ซ้ายกว้าง 140px, ขวาขยายเต็มพื้นที่ที่เหลือ */
-.hero-head {
-  display: grid;
-  grid-template-columns: 140px 1fr;
-  gap: 16px;
-  align-items: start;
-  margin-bottom: 10px;
+/* การ์ดตัวละคร: กรอบพื้นหลังเข้ม + แบ่ง 2 คอลัมน์ด้วย Grid */
+.hero-head{
+  display:grid;
+  grid-template-columns:150px 1fr;
+  gap:14px;
+  align-items:center;
+  background:#0f141c;
+  border:1px solid var(--line);
+  border-radius:16px;
+  padding:12px;
 }
-
-.hero-avatar-col {
-  display: flex;
-  justify-content: center;
-  align-items: flex-start;
+.hero-avatar-col{display:flex;justify-content:center;align-items:center}
+/* ⭐ ปลดล็อค max-height ของ .sprite ที่เคยบีบรูปให้เตี้ย + ขยายเป็น 150px */
+.hero-head #home-hero{
+  height:150px;width:150px;
+  max-height:none;max-width:none;
+  object-fit:contain;
+  background:radial-gradient(circle at 50% 65%,rgba(76,141,255,.20),transparent 70%);
+  border:1px solid var(--line);border-radius:14px;padding:4px;
 }
-
-/* ขยายรูป Avatar ให้ใหญ่ขึ้นเป็น 140x140 */
-.hero-head #home-hero {
-  height: 140px;
-  width: 140px;
-  object-fit: contain;
-  background: radial-gradient(circle at 50% 65%,rgba(76,141,255,.20),transparent 70%);
-  border: 1px solid var(--line);
-  border-radius: 16px;
-  padding: 4px;
-  margin: 0;
-  flex: none;
-}
-
-/* คอลัมน์ขวาจัดเรียงเป็นแนวตั้ง */
-.hero-meta {
-  display: flex;
-  flex-direction: column;
-  width: 100%;
-  min-width: 0;
-}
-
+.hero-meta{display:flex;flex-direction:column;gap:6px;min-width:0}
 .hero-row{display:flex;align-items:center;gap:8px}
 .hero-row .hero-title{flex:1}
+/* แถวสถานะขนาดเล็ก: ป้ายซ้าย ค่าขวา */
+.mini-stat{display:flex;justify-content:space-between;align-items:center;
+  font-size:14px;color:var(--dim)}
+.mini-stat b{color:var(--txt);font-weight:800;font-size:15px}
 
 /* ปุ่มเปิด/ปิดเสียง */
 .snd-btn{width:46px;height:46px;min-width:46px;margin:0;padding:0;font-size:22px;
@@ -88,25 +77,22 @@ button.warn{background:#30363d}
 .snd-btn:hover{border-color:var(--acc)}
 .float-snd{position:absolute;top:14px;right:14px;z-index:5}
 #screen-battle .card{position:relative}
-
 /* สถานะการบันทึกออนไลน์ */
 .cloud{font-size:13px;text-align:center;margin-top:8px;min-height:18px;color:var(--dim)}
 .cloud.ok{color:var(--hp)}
 .cloud.warn{color:var(--exp)}
-
 /* จุดที่ควรฝึกเพิ่ม */
 .weak{display:none;margin-top:12px;padding:12px;border-radius:12px;font-size:16px;
   background:rgba(210,153,34,.10);border:1px solid rgba(210,153,34,.42);color:var(--txt)}
 .weak b{color:var(--exp);font-size:18px}
 .weak span{color:var(--dim);font-size:14px}
-
 /* บอสเรืองแสง */
 .boss-glow{filter:drop-shadow(0 0 14px rgba(248,81,73,.65)) drop-shadow(0 6px 8px rgba(0,0,0,.5))!important}
 .hero-title{font-size:22px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-@media (max-width:360px){
-  .hero-head{grid-template-columns: 110px 1fr;}
-  .hero-head #home-hero{height:110px;width:110px;flex:0 0 110px}
-  .hero-title{font-size:20px}
+@media (max-width:400px){
+  .hero-head{grid-template-columns:110px 1fr;gap:10px}
+  .hero-head #home-hero{height:110px;width:110px}
+  .hero-title{font-size:18px}
 }
 
 .stat-line{display:flex;justify-content:space-between;font-size:15px;color:var(--dim);margin:8px 0}
