@@ -25,9 +25,18 @@ function showScreen(id) {
 }
 function esc(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
 
-// ---- sound ----
+// ---- sound (ปิด/เปิดได้ จำค่าไว้) ----
+let soundOn = (localStorage.getItem('mathrpg_sound') ?? '1') === '1';
+function setSound(on) {
+  soundOn = on;
+  try { localStorage.setItem('mathrpg_sound', on ? '1' : '0'); } catch(e){}
+  document.querySelectorAll('.snd-btn').forEach(b => {
+    b.textContent = on ? '🔊' : '🔇';
+    b.title = on ? 'ปิดเสียง' : 'เปิดเสียง';
+  });
+}
 let _ac=null;
-function tone(f,d=.13,t='sine'){try{_ac=_ac||new(window.AudioContext||window.webkitAudioContext)();
+function tone(f,d=.13,t='sine'){if(!soundOn)return;try{_ac=_ac||new(window.AudioContext||window.webkitAudioContext)();
  if(_ac.state==='suspended')_ac.resume();const o=_ac.createOscillator(),g=_ac.createGain();
  o.type=t;o.frequency.value=f;g.gain.setValueAtTime(.001,_ac.currentTime);
  g.gain.exponentialRampToValueAtTime(.22,_ac.currentTime+.01);
@@ -38,7 +47,21 @@ function sBad(){tone(200,.25,'sawtooth');}
 function sWin(){[523,659,784,1046].forEach((f,i)=>setTimeout(()=>tone(f,.18,'triangle'),i*110));}
 function sLose(){[440,349,262].forEach((f,i)=>setTimeout(()=>tone(f,.32,'sawtooth'),i*180));}
 function sClick(){tone(520,.05,'square');}
-function vib(p){try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+function vib(p){if(!soundOn)return;try{navigator.vibrate&&navigator.vibrate(p)}catch(e){}}
+
+// ---- preload รูปมอนสเตอร์ของพื้นที่ที่ปลดล็อกแล้ว (กันรูปโหลดช้าตอนเข้าศึก) ----
+const _preloaded = new Set();
+function preloadArea(areaId) {
+  const a = AREAS.find(x => x.id === areaId);
+  if (!a) return;
+  a.pool.forEach(f => {
+    const src = `image/enemies/${f}.png`;
+    if (_preloaded.has(src)) return;
+    _preloaded.add(src);
+    const img = new Image();
+    img.src = src;
+  });
+}
 
 // ============================================
 // SAVE / LOAD  (localStorage เสมอ + Supabase ถ้าล็อกอิน)
@@ -53,18 +76,71 @@ function loadLocal() {
   try { const r = localStorage.getItem(saveKey()); return r ? JSON.parse(r) : null; } catch(e){ return null; }
 }
 
-// sync XP/level ขึ้น Supabase (ใช้คอลัมน์เดิม xp/level ของตาราง accounts)
+// sync ความคืบหน้าขึ้น Supabase (ต้องรัน supabase_setup.sql ก่อน)
+let cloudState = 'idle';   // idle | ok | missing | error
 async function syncCloud() {
   if (!db || !account || account.guest) return;
-  const totalXp = totalXpOf(player);
   try {
-    await db.rpc('math_save_score', {
-      p_name: account.name, p_pin: account.pin, p_xp: totalXp, p_level: player.level
+    const { error } = await db.rpc('math_save_score', {
+      p_name: account.name, p_pin: account.pin,
+      p_xp: totalXpOf(player), p_level: player.level,
+      p_hero_id: player.heroId, p_gold: player.gold,
+      p_kills: player.monstersKilled, p_best_combo: player.bestCombo,
+      p_correct: player.totalCorrect, p_wrong: player.totalWrong,
+      p_area: player.unlockedArea, p_hp: player.hp
     });
+    if (error) throw error;
+    cloudState = 'ok';
   } catch (e) {
-    // ถ้าโปรเจคยังไม่มี RPC นี้ ให้ข้ามไปเงียบ ๆ — เกมยังเล่นได้ด้วย localStorage
-    console.warn('cloud sync skipped:', e.message || e);
+    // 404 = ยังไม่ได้รัน supabase_setup.sql -> เกมยังเล่นได้ด้วย localStorage
+    const msg = String(e.message || e);
+    cloudState = /not find|404|does not exist/i.test(msg) ? 'missing' : 'error';
+    console.warn('cloud sync:', cloudState, msg);
   }
+  updateCloudBadge();
+}
+
+// โหลดเซฟจากคลาวด์ (เล่นต่อข้ามเครื่อง) — คืน player object หรือ null
+async function loadCloud() {
+  if (!db || !account || account.guest) return null;
+  try {
+    const { data, error } = await db.rpc('math_load_rpg',
+      { p_name: account.name, p_pin: account.pin });
+    if (error) throw error;
+    if (!data || !data.length || !data[0].hero_id) return null;
+    const d = data[0];
+    const p = createPlayer(account.name, d.hero_id);
+    p.level = Math.max(1, d.level || 1);
+    applyLevelStats(p);
+    // แปลง xp สะสมรวม -> exp ในเลเวลปัจจุบัน
+    let rest = d.xp || 0;
+    for (let l = 1; l < p.level; l++) rest -= BALANCE.expToNext(l);
+    p.exp = Math.max(0, Math.min(rest, p.expToNext - 1));
+    p.gold = d.gold || 0;
+    p.monstersKilled = d.kills || 0;
+    p.bestCombo = d.best_combo || 0;
+    p.totalCorrect = d.correct || 0;
+    p.totalWrong = d.wrong || 0;
+    p.unlockedArea = Math.max(1, d.area || 1);
+    p.hp = (d.hp && d.hp > 0) ? Math.min(d.hp, p.maxHp) : p.maxHp;
+    cloudState = 'ok';
+    return p;
+  } catch (e) {
+    const msg = String(e.message || e);
+    cloudState = /not find|404|does not exist/i.test(msg) ? 'missing' : 'error';
+    console.warn('cloud load:', cloudState, msg);
+    return null;
+  }
+}
+
+function updateCloudBadge() {
+  const el = document.getElementById('cloud-badge');
+  if (!el) return;
+  if (account && account.guest) { el.textContent = '👤 โหมด Guest (ไม่บันทึกออนไลน์)'; el.className = 'cloud warn'; return; }
+  if (cloudState === 'ok')      { el.textContent = '☁️ บันทึกออนไลน์แล้ว'; el.className = 'cloud ok'; return; }
+  if (cloudState === 'missing') { el.textContent = '⚠️ ยังไม่ได้ตั้งค่าฐานข้อมูล — เซฟในเครื่องเท่านั้น'; el.className = 'cloud warn'; return; }
+  if (cloudState === 'error')   { el.textContent = '⚠️ เชื่อมต่อคลาวด์ไม่ได้ — เซฟในเครื่องแทน'; el.className = 'cloud warn'; return; }
+  el.textContent = ''; el.className = 'cloud';
 }
 function totalXpOf(p) {
   let t = p.exp;
@@ -104,17 +180,26 @@ $('btn-logout').onclick = () => {
   $('auth-pin').value = ''; showScreen('screen-auth');
 };
 
-function afterAuth() {
-  const saved = loadLocal();
+async function afterAuth() {
+  const local = loadLocal();
+  const cloud = await loadCloud();          // null ถ้ายังไม่ตั้งค่า DB / เล่น Guest
+
+  // เลือกตัวที่คืบหน้ามากกว่า (กันเซฟเก่าทับเซฟใหม่)
+  let saved = local;
+  if (cloud && (!local || totalXpOf(cloud) > totalXpOf(local))) saved = cloud;
+
   if (saved && saved.heroId) {
     player = saved;
-    applyLevelStats(player);                       // เผื่อปรับสูตรบาลานซ์ภายหลัง
-    player.hp = Math.min(player.hp, player.maxHp);
+    applyLevelStats(player);                // เผื่อปรับสูตรบาลานซ์ภายหลัง
+    player.hp = Math.min(player.hp || player.maxHp, player.maxHp);
+    if (player.hp <= 0) player.hp = Math.max(1, Math.round(player.maxHp * 0.3));
+    saveLocal();
     goHome();
   } else {
     buildHeroGrid();
     showScreen('screen-hero');
   }
+  updateCloudBadge();
 }
 
 // ============================================
@@ -151,6 +236,7 @@ $('btn-hero-ok').onclick = () => {
 // ============================================
 function goHome() {
   renderHome();
+  preloadArea(player.unlockedArea);            // เตรียมรูปไว้ล่วงหน้า
   showScreen('screen-home');
   loadLeaderboard();
   saveLocal();
@@ -224,6 +310,12 @@ function startBattle(areaId, forceBoss) {
   $('b-psprite').src = player.heroImg;
   $('b-pname').textContent = `${player.name} Lv.${player.level}`;
   $('b-msprite').src = battle.monster.img;
+  // ขนาดตามความน่ากลัว: มอนธรรมดา 100%, ตัวแรง/บอสใหญ่ขึ้น
+  const m0 = battle.monster;
+  const scale = m0.isBoss ? 1.5 : Math.min(1.28, 0.92 + m0.level * 0.02);
+  $('b-msprite').style.transform = `scale(${scale.toFixed(2)})`;
+  $('b-msprite').style.transformOrigin = 'bottom center';
+  $('b-msprite').classList.toggle('boss-glow', !!m0.isBoss);
   $('b-msprite').onerror = () => { $('b-msprite').style.visibility='hidden'; };
   $('b-msprite').style.visibility = 'visible';
   $('b-mname').innerHTML = `${esc(battle.monster.name)} Lv.${battle.monster.level}` +
@@ -231,8 +323,42 @@ function startBattle(areaId, forceBoss) {
   $('b-log').textContent = battle.monster.isBoss ? '⚠️ บอสปรากฏตัว!' : 'มอนสเตอร์ปรากฏตัว!';
   $('ans').value = '';
   renderBattle();
+  qStart = Date.now();
   showScreen('screen-battle');
   setTimeout(()=>$('ans').focus(), 200);
+}
+
+// ---- จับเวลาต่อข้อ: รู้ว่าเด็กติดโจทย์แบบไหน ----
+let qStart = null;
+const TYPE_TH = { add:'บวก', sub:'ลบ', mul:'คูณ', div:'หาร',
+                  eq1:'สมการ x+a=b', eq2:'สมการ ax=b',
+                  eq3:'สมการ ax+b=c', eq4:'สมการ 2 ฝั่ง' };
+function loadStats() {
+  try { return JSON.parse(localStorage.getItem('mathrpg_stats') || '{}'); } catch(e){ return {}; }
+}
+function recordTiming(q, correct, secs) {
+  if (!q || !q.type) return;
+  const s = loadStats();
+  const k = q.type;
+  s[k] = s[k] || { n:0, correct:0, time:0 };
+  s[k].n++;
+  if (correct) s[k].correct++;
+  s[k].time += Math.min(secs, 60);      // กันค่าเพี้ยนถ้าเดินออกจากจอ
+  try { localStorage.setItem('mathrpg_stats', JSON.stringify(s)); } catch(e){}
+}
+// คืนประเภทโจทย์ที่ "ช้าที่สุด" และ "ผิดบ่อยสุด"
+function weakestType() {
+  const s = loadStats();
+  let worst = null;
+  Object.keys(s).forEach(k => {
+    const d = s[k];
+    if (d.n < 3) return;                       // ข้อมูลน้อยเกินไป ยังไม่สรุป
+    const acc = d.correct / d.n;
+    const avg = d.time / d.n;
+    const score = (1 - acc) * 2 + Math.min(avg / 10, 1);   // ผิดสำคัญกว่าช้า
+    if (!worst || score > worst.score) worst = { k, score, acc, avg, n: d.n };
+  });
+  return worst;
 }
 
 function renderBattle() {
@@ -262,7 +388,9 @@ function doSubmit() {
   $('b-hint').textContent = '';     // ล้างคำใบ้ของข้อก่อนหน้า
 
   const q = battle.question;
+  const secs = qStart ? (Date.now() - qStart) / 1000 : 0;
   const r = submitAnswer(battle, raw);
+  recordTiming(q, r.correct, secs);
   $('ans').value = '';
 
   const pBox = $('b-psprite').parentElement;
@@ -297,7 +425,7 @@ function doSubmit() {
     saveLocal();
     if (r.status === 'victory') endBattle(true, r);
     else if (r.status === 'gameover') endBattle(false, r);
-    else { renderBattle(); $('ans').focus(); }
+    else { renderBattle(); qStart = Date.now(); $('ans').focus(); }
   }, 620);
 }
 
@@ -329,6 +457,17 @@ function renderTally() {
     `<div class="t ok"><div class="n">${c}</div><div class="l">ตอบถูก</div></div>` +
     `<div class="t no"><div class="n">${w}</div><div class="l">ตอบผิด</div></div>` +
     `<div class="t acc"><div class="n">${acc}%</div><div class="l">ความแม่นยำ</div></div>`;
+
+  // บอกจุดที่ควรฝึกเพิ่ม (จากเวลาและความถูกต้องจริง)
+  const wk = weakestType();
+  const el = $('r-weak');
+  if (el) {
+    if (wk) {
+      el.innerHTML = `📌 ควรฝึกเพิ่ม: <b>${TYPE_TH[wk.k] || wk.k}</b> ` +
+        `<span>(ถูก ${Math.round(wk.acc*100)}% · เฉลี่ย ${wk.avg.toFixed(1)} วิ/ข้อ)</span>`;
+      el.style.display = 'block';
+    } else { el.style.display = 'none'; }
+  }
 }
 
 function endBattle(win, r) {
@@ -372,4 +511,12 @@ function endBattle(win, r) {
 }
 
 $('btn-again').onclick = () => { sClick(); startBattle(lastArea, false); };
+
+// ---- ปุ่มเปิด/ปิดเสียง ----
+['btn-sound','btn-sound2'].forEach(id => {
+  const b = document.getElementById(id);
+  if (b) b.onclick = (e) => { e.stopPropagation(); setSound(!soundOn); if (soundOn) sClick(); };
+});
+setSound(soundOn);          // ตั้งไอคอนให้ตรงกับค่าที่จำไว้
+updateCloudBadge();
 $('btn-home').onclick  = () => { sClick(); goHome(); };

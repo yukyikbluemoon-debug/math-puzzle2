@@ -49,6 +49,25 @@ button.warn{background:#30363d}
   background:radial-gradient(circle at 50% 65%,rgba(76,141,255,.20),transparent 70%);
   border:1px solid var(--line);border-radius:16px;padding:4px}
 .hero-meta{flex:1;min-width:0}
+.hero-row{display:flex;align-items:center;gap:8px}
+.hero-row .hero-title{flex:1}
+/* ปุ่มเปิด/ปิดเสียง */
+.snd-btn{width:46px;height:46px;min-width:46px;margin:0;padding:0;font-size:22px;
+  background:#0f141c;border:1px solid var(--line);border-radius:12px;line-height:1}
+.snd-btn:hover{border-color:var(--acc)}
+.float-snd{position:absolute;top:14px;right:14px;z-index:5}
+#screen-battle .card{position:relative}
+/* สถานะการบันทึกออนไลน์ */
+.cloud{font-size:13px;text-align:center;margin-top:8px;min-height:18px;color:var(--dim)}
+.cloud.ok{color:var(--hp)}
+.cloud.warn{color:var(--exp)}
+/* จุดที่ควรฝึกเพิ่ม */
+.weak{display:none;margin-top:12px;padding:12px;border-radius:12px;font-size:16px;
+  background:rgba(210,153,34,.10);border:1px solid rgba(210,153,34,.42);color:var(--txt)}
+.weak b{color:var(--exp);font-size:18px}
+.weak span{color:var(--dim);font-size:14px}
+/* บอสเรืองแสง */
+.boss-glow{filter:drop-shadow(0 0 14px rgba(248,81,73,.65)) drop-shadow(0 6px 8px rgba(0,0,0,.5))!important}
 .hero-title{font-size:22px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 @media (max-width:360px){
   .hero-head #home-hero{height:92px;width:92px;flex:0 0 92px}

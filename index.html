@@ -41,7 +41,10 @@
       <div class="hero-head">
         <img id="home-hero" class="sprite" alt="">
         <div class="hero-meta">
-          <div class="hero-title" id="home-name">-</div>
+          <div class="hero-row">
+            <div class="hero-title" id="home-name">-</div>
+            <button class="snd-btn" id="btn-sound" title="ปิดเสียง">🔊</button>
+          </div>
           <div class="stat-line"><span>Level <b id="home-lv">1</b></span><span>💰 <b id="home-gold">0</b></span></div>
         </div>
       </div>
@@ -57,6 +60,7 @@
       </div>
       <div class="bar exp" style="margin-top:4px"><i id="home-expbar" style="width:0%"></i></div>
       <button id="btn-rest" class="warn" style="margin-top:10px">🏕️ พักฟื้น (ใช้ 10 ทอง เต็ม HP)</button>
+      <div id="cloud-badge" class="cloud"></div>
 
       <p class="sub" style="margin:16px 0 4px">เลือกพื้นที่ล่ามอนสเตอร์</p>
       <div id="area-list"></div>
@@ -70,6 +74,7 @@
   <!-- ============ BATTLE ============ -->
   <section id="screen-battle" class="screen">
     <div class="card">
+      <button class="snd-btn float-snd" id="btn-sound2" title="ปิดเสียง">🔊</button>
       <div class="combat">
         <div class="unit">
           <div class="nm" id="b-pname">Player</div>
@@ -113,6 +118,7 @@
       <div id="r-lvup"></div>
       <div class="reward" id="r-reward"></div>
       <div class="tally" id="r-tally"></div>
+      <div id="r-weak" class="weak"></div>
       <div class="row">
         <button id="btn-again">สู้ต่อ</button>
         <button id="btn-home" class="ghost">กลับฐาน</button>

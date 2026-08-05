@@ -15,10 +15,15 @@ const w=dom.window;
 const $=id=>w.document.getElementById(id);
 const act=()=>[...w.document.querySelectorAll('.screen')].find(s=>s.classList.contains('active')).id;
 
+const tick = () => new Promise(r => setTimeout(r, 30));
+
+(async () => {
 console.log('=== TALLY (สรุปถูก/ผิด) ===');
 $('btn-guest').click();
+await tick();                       // afterAuth เป็น async (ลองโหลดเซฟจากคลาวด์ก่อน)
 w.document.querySelectorAll('.hero-cell')[3].click();
 $('btn-hero-ok').click();
+await tick();
 w.document.querySelectorAll('.area-btn')[0].click();
 
 // --- ชนะ: ถูก 7 ผิด 2 -> 78% ---
@@ -74,3 +79,4 @@ ok($('home-expbar')!==null && $('home-hpbar')!==null, 'id แถบทั้ง�
 
 console.log(fails===0?'\n*** TALLY TESTS PASSED ***':`\n*** ${fails} FAILED ***`);
 process.exit(fails?1:0);
+})();
