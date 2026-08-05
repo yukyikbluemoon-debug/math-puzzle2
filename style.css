@@ -43,6 +43,17 @@ button.warn{background:#30363d}
 .hero-name{text-align:center;font-size:14px;color:var(--acc);min-height:20px;font-weight:600}
 
 /* ---- home ---- */
+/* หัวหน้าฐาน: รูปฮีโร่ใหญ่ขึ้น มีกรอบเรืองแสง */
+.hero-head{display:flex;gap:14px;align-items:center}
+.hero-head #home-hero{height:112px;width:112px;object-fit:contain;flex:0 0 112px;
+  background:radial-gradient(circle at 50% 65%,rgba(76,141,255,.20),transparent 70%);
+  border:1px solid var(--line);border-radius:16px;padding:4px}
+.hero-meta{flex:1;min-width:0}
+.hero-title{font-size:22px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+@media (max-width:360px){
+  .hero-head #home-hero{height:92px;width:92px;flex:0 0 92px}
+  .hero-title{font-size:20px}
+}
 .stat-line{display:flex;justify-content:space-between;font-size:15px;color:var(--dim);margin:8px 0}
 .stat-line b{color:var(--txt);font-weight:800;font-size:17px}
 .bar{height:16px;background:#0f141c;border-radius:99px;overflow:hidden;border:1px solid var(--line)}

@@ -38,21 +38,24 @@
   <!-- ============ HOME ============ -->
   <section id="screen-home" class="screen">
     <div class="card">
-      <div style="display:flex;gap:12px;align-items:center">
-        <img id="home-hero" class="sprite" style="height:74px" alt="">
-        <div style="flex:1">
-          <div style="font-size:19px;font-weight:700" id="home-name">-</div>
+      <div class="hero-head">
+        <img id="home-hero" class="sprite" alt="">
+        <div class="hero-meta">
+          <div class="hero-title" id="home-name">-</div>
           <div class="stat-line"><span>Level <b id="home-lv">1</b></span><span>💰 <b id="home-gold">0</b></span></div>
-          <div class="bar exp"><i id="home-expbar" style="width:0%"></i></div>
-          <div class="stat-line"><span id="home-exptxt">0/60 EXP</span></div>
         </div>
       </div>
-      <div class="stat-line" style="margin-top:12px">
+      <!-- HP กับ EXP อยู่นอกคอลัมน์รูป → กว้างเท่ากันพอดี -->
+      <div class="stat-line" style="margin-top:14px">
         <span>❤️ HP <b id="home-hp">80/80</b></span>
         <span>⚔️ ATK <b id="home-atk">10</b></span>
         <span>🏆 ล้ม <b id="home-kill">0</b></span>
       </div>
       <div class="bar hp" style="margin-top:4px"><i id="home-hpbar" style="width:100%"></i></div>
+      <div class="stat-line" style="margin-top:12px">
+        <span>⭐ EXP</span><span id="home-exptxt">0/60 EXP</span>
+      </div>
+      <div class="bar exp" style="margin-top:4px"><i id="home-expbar" style="width:0%"></i></div>
       <button id="btn-rest" class="warn" style="margin-top:10px">🏕️ พักฟื้น (ใช้ 10 ทอง เต็ม HP)</button>
 
       <p class="sub" style="margin:16px 0 4px">เลือกพื้นที่ล่ามอนสเตอร์</p>

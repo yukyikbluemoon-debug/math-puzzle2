@@ -57,5 +57,20 @@ ok(kp&&+kp[1]>=26,`คีย์แพด ${kp?kp[1]:'?'}px (เดิม 19px)`)
 const mh=css.match(/\.keypad button\{[^}]*min-height:(\d+)px/);
 ok(mh&&+mh[1]>=60,`ปุ่มคีย์แพดสูง ${mh?mh[1]:'?'}px`);
 
+// --- หน้าฐาน: รูปฮีโร่ + แถบ HP/EXP ---
+console.log('\n=== HOME LAYOUT ===');
+const heroCss = css.match(/\.hero-head #home-hero\{height:(\d+)px/);
+ok(heroCss && +heroCss[1] >= 100, `รูปฮีโร่หน้าฐาน ${heroCss?heroCss[1]:'?'}px (เดิม 74px)`);
+const homeHtml = fs.readFileSync(path.join(__dirname,'index.html'),'utf8');
+// แถบทั้งสองต้องเป็นลูกโดยตรงของ .card (ไม่อยู่ในคอลัมน์ข้างรูป) จึงจะกว้างเท่ากัน
+const headBlock = homeHtml.slice(homeHtml.indexOf('<div class="hero-head">'),
+                                homeHtml.indexOf('<button id="btn-rest"'));
+ok(!/<div class="bar exp"/.test(headBlock.slice(0, headBlock.indexOf('</div>\n      </div>'))),
+   'แถบ EXP ถูกย้ายออกจากคอลัมน์ข้างรูปฮีโร่แล้ว');
+const barsAtSameLevel = /<div class="bar hp"[^>]*>[\s\S]*?<div class="bar exp"/.test(homeHtml);
+ok(barsAtSameLevel, 'แถบ HP และ EXP อยู่ระดับเดียวกันใน DOM (กว้างเท่ากัน)');
+ok(!/style="height:74px"/.test(homeHtml), 'ไม่มี inline height:74px เดิมค้างอยู่');
+ok($('home-expbar')!==null && $('home-hpbar')!==null, 'id แถบทั้งสองยังอยู่ครบ (JS อัปเดตได้)');
+
 console.log(fails===0?'\n*** TALLY TESTS PASSED ***':`\n*** ${fails} FAILED ***`);
 process.exit(fails?1:0);
